@@ -1,0 +1,56 @@
+# Dokploy HTTPS preview. The gateway is the only routed service.
+services:
+  db:
+    extends: {file: compose.preview.yml, service: db}
+    environment:
+      POSTGRES_PASSWORD: ${MGTS_DB_PASSWORD:?required}
+  schema-init:
+    extends: {file: compose.preview.yml, service: schema-init}
+    environment:
+      PGPASSWORD: ${MGTS_DB_PASSWORD:?required}
+  minio:
+    extends: {file: compose.preview.yml, service: minio}
+    environment:
+      MINIO_ROOT_PASSWORD: ${MGTS_STORAGE_PASSWORD:?required}
+  backend:
+    extends: {file: compose.preview.yml, service: backend}
+    environment:
+      DB_PASSWORD: ${MGTS_DB_PASSWORD:?required}
+      S3_SECRET_KEY: ${MGTS_STORAGE_PASSWORD:?required}
+      JWT_SECRET: ${MGTS_JWT_SECRET:?required}
+      AUTH_REQUIRED: 'true'
+      JWT_EXPIRES_MINUTES: '43200' # Existing Bearer API clients; browser Basic caching is user-agent controlled.
+  frontend:
+    extends: {file: compose.preview.yml, service: frontend}
+    ports: !reset []
+  gateway:
+    image: caddy:2.10.2-alpine
+    labels:
+      mgts.gateway-config: browser-basic-v2
+    environment:
+      PREVIEW_PASSWORD_HASH: ${MGTS_PREVIEW_PASSWORD_HASH:?required}
+    ports:
+      - "18443:8443"
+    volumes:
+      - gateway_data:/data
+    configs:
+      - source: gateway
+        target: /etc/caddy/Caddyfile
+    depends_on:
+      frontend:
+        condition: service_healthy
+configs:
+  gateway:
+    content: |
+      https://${MGTS_PREVIEW_HOST:?required}:8443 {
+        tls internal
+        basic_auth {
+          admin {$$PREVIEW_PASSWORD_HASH}
+        }
+        reverse_proxy frontend:3000
+      }
+volumes:
+  db:
+  photos:
+  uploads:
+  gateway_data:

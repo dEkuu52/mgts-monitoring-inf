@@ -1,0 +1,8 @@
+# Зависимости ИИ-воркера: API-слой плюс ML-стек из корневого requirements.txt.
+# PyTorch и torchvision ставятся отдельно с CPU-индекса (см. worker.Dockerfile).
+-r requirements.txt
+
+numpy==2.5.5
+pillow==13.0.0
+opencv-python==5.0.0.93
+ultralytics==8.4.214

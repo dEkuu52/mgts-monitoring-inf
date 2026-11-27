@@ -1,0 +1,11 @@
+# Контекст сборки образа воркера (dockerfile: backend/worker.Dockerfile).
+# Веса YOLO и .env в образ не попадают — они монтируются/читаются в рантайме.
+.git
+.env
+**/.venv
+**/node_modules
+**/__pycache__
+**/*.py[cod]
+frontend
+uploads
+cv

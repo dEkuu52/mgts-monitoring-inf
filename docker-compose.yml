@@ -1,0 +1,140 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: ${CONTAINER_NAME:-mtgs_hack_db}
+    restart: always
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 5s
+
+  schema-init:
+    image: postgres:15-alpine
+    command: [psql, -v, ON_ERROR_STOP=1, '-1', -f, /schema/schema.sql]
+    environment:
+      PGHOST: db
+      PGPORT: 5432
+      PGUSER: ${DB_USER}
+      PGPASSWORD: ${DB_PASSWORD}
+      PGDATABASE: ${DB_NAME}
+    volumes:
+      - ./backend/sql/schema.sql:/schema/schema.sql:ro
+    depends_on:
+      db:
+        condition: service_healthy
+
+  minio:
+    # Официальные образы minio/minio удалены с Docker Hub (и из quay.io).
+    # pgsty/minio — community-форк с тем же entrypoint и API; тег зафиксирован.
+    image: pgsty/minio:RELEASE.2026-08-04T00-00-00Z
+    container_name: ${MINIO_CONTAINER_NAME:-mtgs_hack_minio}
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY:-minioadmin}
+    ports:
+      - "${MINIO_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    volumes:
+      - minio_data:/data
+
+  backend:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      # Внутри docker-сети БД доступна по имени сервиса, а не по localhost.
+      DB_HOST: db
+      DB_PORT: 5432
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-change-me-0123456789abcdef}
+      AUTH_REQUIRED: ${AUTH_REQUIRED:-false}
+      # MinIO также доступен по имени сервиса внутри docker-сети.
+      S3_ENDPOINT: http://minio:9000
+      # Каталог для /api/upload и результатов обработки.
+      # PROJECT_ROOT в контейнере равен "/", поэтому путь задаётся явно.
+      UPLOADS_DIR: /app/uploads
+    volumes:
+      # Общий с воркером том: туда пишутся /uploads/raw и /uploads/processed.
+      - uploads_data:/app/uploads
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      schema-init:
+        condition: service_completed_successfully
+      minio:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health').read()"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  # ИИ-воркер: забирает объекты со статусом awaiting_processing из БД,
+  # скачивает фото из MinIO и прогоняет через YOLO из папки cv.
+  worker:
+    build:
+      context: .
+      dockerfile: backend/worker.Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      S3_ENDPOINT: http://minio:9000
+      UPLOADS_DIR: /app/uploads
+      # Веса модели монтируются с хоста, чтобы их можно было менять без сборки образа.
+      WEIGHTS_PATH: /weights/2-version.pt
+    volumes:
+      - uploads_data:/app/uploads
+      - ./cv/ml/yolo-v:/weights:ro
+    depends_on:
+      db:
+        condition: service_healthy
+      schema-init:
+        condition: service_completed_successfully
+      minio:
+        condition: service_started
+
+  frontend:
+    build:
+      context: ./frontend
+    restart: unless-stopped
+    environment:
+      # Куда Nuxt-прокси пересылает запросы /api/*.
+      # Nitro отрезает префикс /api/ перед пересылкой, поэтому путь /api нужен в target.
+      API_PROXY_TARGET: http://backend:8000/api
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 40s
+
+volumes:
+  postgres_data:
+  minio_data:
+  uploads_data:

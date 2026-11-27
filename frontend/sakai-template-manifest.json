@@ -1,0 +1,49 @@
+{
+  "template": {
+    "name": "Sakai Vue",
+    "version": "5.0.0",
+    "repository": "https://github.com/primefaces/sakai-vue",
+    "revision": "ec6b6ef53ad4fa7f2861277f50f2d9e236c40372"
+  },
+  "assets": {
+    "name": "Sakai assets",
+    "repository": "https://github.com/primefaces/sakai-assets",
+    "revision": "eaa70ece4cfa9aeb8f60b36dce5a422b6bae8003"
+  },
+  "license": "MIT",
+  "licenseFile": {
+    "source": "LICENSE.md",
+    "target": "licenses/SAKAI-MIT-LICENSE.md",
+    "sha256": "cd6426739ea0d1bf7b6692f54563165fa6bd3f2cd236aa82f9fc2a01de37f193"
+  },
+  "files": [
+    { "source": "styles.scss", "target": "assets/styles.scss", "sha256": "310058fa3fd5326ef04be4b2bd2ac074ecf5e1a957d7f04bc40885c2d67c7a3e" },
+    { "source": "tailwind.css", "target": "assets/tailwind.css", "sha256": "cecd141e54e876ffb10459245be5ae92622593b835012068c51c3dbf6cb51afb" },
+    { "source": "layout/_core.scss", "target": "assets/layout/_core.scss", "sha256": "80e5c02a47dccfc5c5e67b582bdbbd8faf33dbcc74b67665dd3a587734f619ae" },
+    { "source": "layout/_footer.scss", "target": "assets/layout/_footer.scss", "sha256": "960b4296b557de194ff4f3bbafcb7877876312fa521c279e248b0fdbb9b5aac0" },
+    { "source": "layout/_main.scss", "target": "assets/layout/_main.scss", "sha256": "1da1067139d6cd0bb1c3968eacea2058a2041c389b3163e3a713c0c7ec9fed9e" },
+    { "source": "layout/_menu.scss", "target": "assets/layout/_menu.scss", "sha256": "891ee8a6f877620e339101046f0f8355c16b7da38970dd1abbd6812aae71ce72" },
+    { "source": "layout/_mixins.scss", "target": "assets/layout/_mixins.scss", "sha256": "5bafe7af59220c7e2a5011013d66078d8bffe6e2f59a0f9d67150e74025df2c4" },
+    { "source": "layout/_preloading.scss", "target": "assets/layout/_preloading.scss", "sha256": "11e4e8f28717cac2ccfb714097a9b36b2ad3bdf676ababa35d811c8f81bfba6c" },
+    { "source": "layout/_responsive.scss", "target": "assets/layout/_responsive.scss", "sha256": "915fb60804757a309433fd6b00f4174aa66486dbf0e72e915b6b422cc1bc0121" },
+    { "source": "layout/_topbar.scss", "target": "assets/layout/_topbar.scss", "sha256": "79c8a12a57751f27d4425eb12bf99057e76ed268fdb85bf55913683f666ec27b" },
+    { "source": "layout/_typography.scss", "target": "assets/layout/_typography.scss", "sha256": "ff373d43902621b1d708f19fc641477b47ea64246be62d1ddfda250beaac5fc8" },
+    { "source": "layout/_utils.scss", "target": "assets/layout/_utils.scss", "sha256": "7773afbd061cab2169ba2f66b7d86f4649803f9c89057b60a71f9234e375d64b" },
+    { "source": "layout/layout.scss", "target": "assets/layout/layout.scss", "sha256": "ebb6e0945efd9a42fec1c3562e8093d9311c66107f4fef2d149750734f270c9d" },
+    { "source": "layout/variables/_common.scss", "target": "assets/layout/variables/_common.scss", "sha256": "10e22b75daec188ed174ab927771da5f2e5fb499f5072469437bbac79ca07a0d" },
+    { "source": "layout/variables/_dark.scss", "target": "assets/layout/variables/_dark.scss", "sha256": "c02e2e49559cd7aefe0e96f0e14cc07f1143e44a2d892820316a3482668cac41" },
+    { "source": "layout/variables/_light.scss", "target": "assets/layout/variables/_light.scss", "sha256": "0f5ccb8117fe8269dad6a37b540afb9d84e38bfeb9431191534b2d987a0be6fc" },
+    { "source": "demo/demo.scss", "target": "assets/demo/demo.scss", "sha256": "4a00239351828d2fd2ad61522d413f467f34b7b47e6e4dfb54d13b89ea674e33" },
+    { "source": "demo/code.scss", "target": "assets/demo/code.scss", "sha256": "837c1909af14187c69f9be7199f6aa136df6b9dbb7ccba89b0062e8f3a56c6c8" },
+    { "source": "demo/flags/flags.css", "target": "assets/demo/flags/flags.css", "sha256": "b7c69eec6878ad1a18d5f9a29e422ee4ae235f98d973008ffc51f524545e590b" }
+  ],
+  "adaptations": [
+    { "source": "src/layout/AppLayout.vue", "sourceSha256": "14f4550c753cf4e382a0e4fada65120ea3579e57ae27f4164dbe7d7d464e3923", "target": "components/sakai/AppLayout.vue" },
+    { "source": "src/layout/AppTopbar.vue", "sourceSha256": "592c4a42a66ece55f4f067be9ee8288a776ea69d858845e7849ec15141bcddbc", "target": "components/sakai/AppTopbar.vue" },
+    { "source": "src/layout/AppSidebar.vue", "sourceSha256": "6ebbf80f6bf4b3fd715351ceb5c3d4622a7520f544383ebb2f1764696fc21995", "target": "components/sakai/AppSidebar.vue" },
+    { "source": "src/layout/AppMenu.vue", "sourceSha256": "92315d81c42a65a2c5ab25b7fb528438a77d55d0086a0bff558589217930593e", "target": "components/sakai/AppMenu.vue" },
+    { "source": "src/layout/AppMenuItem.vue", "sourceSha256": "b5eba3abd2787962041526be28eb2fcdf96ee263b681b6509873206075cb6aad", "target": "components/sakai/AppMenuItem.vue" },
+    { "source": "src/layout/AppFooter.vue", "sourceSha256": "d18fac8e21c74fe2e5e5620d4a094640aaf7d306e032709acbc79ddc9ab91358", "target": "components/sakai/AppFooter.vue" },
+    { "source": "src/layout/composables/layout.js", "sourceSha256": "7bdb0bab6bbe8abd41acaf49a7b68236eec34636493b5b429d8c4d8ae87d557e", "target": "composables/sakai/useSakaiLayout.ts" }
+  ]
+}
